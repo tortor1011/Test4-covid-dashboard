@@ -1,115 +1,157 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
+import { useQuery } from '@tanstack/react-query'
+import axios from 'axios'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  LineChart,
+  Line
+} from 'recharts'
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+// สีสุ่ม 10 สีสำหรับโดนัท
+const COLORS = [
+  '#ef4444', '#f97316', '#facc15', '#22c55e', '#0ea5e9',
+  '#6366f1', '#a855f7', '#ec4899', '#14b8a6', '#94a3b8'
+]
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+
+type ProvinceData = {
+  province: string
+  new_case: number
+  total_case: number
+  new_death: number
+}
 
 export default function Home() {
+  const { data, isLoading, error } = useQuery<ProvinceData[]>({
+    queryKey: ['covid'],
+    queryFn: async () => {
+      const res = await axios.get('https://covid19.ddc.moph.go.th/api/Cases/today-cases-by-provinces')
+      return res.data
+    }
+  })
+
+  if (isLoading) return <p>Loading...</p>
+  if (error) return <p>Error</p>
+
+  const excludedProvinces = ["ทั้งประเทศ"]
+
+  const filteredData = (data || []).filter(
+    (item) => !excludedProvinces.includes(item.province)
+  )
+
+
+  const top10NewCases = [...filteredData]
+    .sort((a, b) => b.new_case - a.new_case)
+    .slice(0, 10)
+
+  const totalCases = filteredData.reduce((sum, item) => sum + item.total_case, 0) || 0
+
+  const top10TotalCases = [...filteredData]
+    .sort((a, b) => b.total_case - a.total_case)
+    .slice(0, 10)
+
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/pages/index.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+
+    <div className="min-h-screen bg-gray-100 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-12">
+
+        {/* ติดทั้งหมด */}
+        <div className="bg-white p-6 rounded-xl shadow">
+          <h2 className="text-2xl font-semibold text-gray-800 mb-2">จำนวนผู้ป่วยทั้งหมด</h2>
+          <p className="text-5xl font-bold text-blue-600">{totalCases.toLocaleString()} ราย</p>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+       
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+          {/* อันนี้รายจังหวัด */}
+          <div className="bg-white p-6 rounded-xl shadow">
+            <h2 className="text-xl font-semibold text-green-500 mb-4">ผู้ป่วยรวมรายจังหวัด</h2>
+            <div className="w-full h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={filteredData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="province" interval={0} angle={-45} textAnchor="end" height={100} />
+                  <YAxis />
+                  <Tooltip />
+                  <Line type="monotone" dataKey="total_case" stroke="#22c55e" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/*อันนี้ตายทั้งหมด */}
+          <div className="bg-white p-6 rounded-xl shadow">
+            <h2 className="text-xl font-semibold text-red-500 mb-4">จำนวนผู้เสียชีวิตแยกจังหวัด</h2>
+            <div className="w-full h-[400px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={filteredData.filter(d => d.new_death > 0)}
+                    dataKey="new_death"
+                    nameKey="province"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={130}
+                    innerRadius={70}
+                    label
+                  >
+                    {filteredData.filter(d => d.new_death > 0).map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+        </div>
+
+        {/* ผู้ป่วยใหม่ท็อปเท็น */}
+        <div className="bg-white p-6 rounded-xl shadow">
+          <h2 className="text-2xl font-semibold text-blue-500 mb-4">Top 10 จังหวัดผู้ป่วยใหม่มากที่สุด</h2>
+          <div className="w-full h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={top10NewCases} layout="vertical" margin={{ left: 80 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis type="number" />
+                <YAxis dataKey="province" type="category" />
+                <Tooltip />
+                <Bar dataKey="new_case" fill="#38bdf8" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* ติดเยอะไม่ค่อยใส่แมช(มั้ง) */}
+        <div className="bg-white p-6 rounded-xl shadow">
+          <h2 className="text-2xl font-semibold text-purple-500 mb-4">Top 10 จังหวัดผู้ป่วยสะสมมากที่สุด</h2>
+          <div className="w-full h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={top10TotalCases} margin={{ top: 20, right: 30, left: 20, bottom: 80 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="province" interval={0} angle={-45} textAnchor="end" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="total_case" fill="#a855f7" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+      </div>
     </div>
-  );
+
+  )
 }
