@@ -71,21 +71,21 @@ export default function Home() {
           <p className="text-5xl font-bold text-blue-600">{totalCases.toLocaleString()} ราย</p>
         </div>
 
-       
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-          {/* อันนี้รายจังหวัด */}
+          {/* ผู้ป่วยใหม่ท็อปเท็น */}
           <div className="bg-white p-6 rounded-xl shadow">
-            <h2 className="text-xl font-semibold text-green-500 mb-4">ผู้ป่วยรวมรายจังหวัด</h2>
+            <h2 className="text-2xl font-semibold text-blue-500 mb-4">Top 10 จังหวัดผู้ป่วยใหม่มากที่สุด</h2>
             <div className="w-full h-[400px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={filteredData}>
+                <BarChart data={top10NewCases} layout="vertical" margin={{ left: 80 }}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="province" interval={0} angle={-45} textAnchor="end" height={100} />
-                  <YAxis />
+                  <XAxis type="number" />
+                  <YAxis dataKey="province" type="category" />
                   <Tooltip />
-                  <Line type="monotone" dataKey="total_case" stroke="#22c55e" />
-                </LineChart>
+                  <Bar dataKey="new_case" fill="#38bdf8" />
+                </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
@@ -118,22 +118,6 @@ export default function Home() {
 
         </div>
 
-        {/* ผู้ป่วยใหม่ท็อปเท็น */}
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h2 className="text-2xl font-semibold text-blue-500 mb-4">Top 10 จังหวัดผู้ป่วยใหม่มากที่สุด</h2>
-          <div className="w-full h-[400px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={top10NewCases} layout="vertical" margin={{ left: 80 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="province" type="category" />
-                <Tooltip />
-                <Bar dataKey="new_case" fill="#38bdf8" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
         {/* ติดเยอะไม่ค่อยใส่แมช(มั้ง) */}
         <div className="bg-white p-6 rounded-xl shadow">
           <h2 className="text-2xl font-semibold text-purple-500 mb-4">Top 10 จังหวัดผู้ป่วยสะสมมากที่สุด</h2>
@@ -149,6 +133,24 @@ export default function Home() {
             </ResponsiveContainer>
           </div>
         </div>
+
+        {/* อันนี้รายจังหวัด */}
+        <div className="bg-white p-6 rounded-xl shadow">
+          <h2 className="text-xl font-semibold text-green-500 mb-4">ผู้ป่วยรวมรายจังหวัด</h2>
+          <div className="w-full h-[400px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={filteredData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="province" interval={0} angle={-45} textAnchor="end" height={100} />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="total_case" stroke="#22c55e" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+
 
       </div>
     </div>
